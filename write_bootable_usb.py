@@ -61,7 +61,27 @@ def print_help():
     print("      ~$ python make_sdcard.py /dev/sdz someimage.img")
     print("  * To write *.iso use a standard os tool that burns bootable USB drives")
     print("")
-    
+
+def check_program_installed(program):
+  try:
+    result = subprocess.check_output("which "+program,shell=True)
+  except subprocess.CalledProcessError:
+    print("Program missing: "+program)
+    return False
+  return True
+
+required_programs = (
+    "parted",
+    "kpartx"
+  )
+something_is_missing = False
+for i in required_programs:
+  tmpres = check_program_installed(i)
+  something_is_missing = something_is_missing or (not tmpres)
+if something_is_missing:
+  sys.exit()
+
+
 if len(sys.argv) > 1:
     DEVICE = sys.argv[1]
 else:
@@ -77,6 +97,7 @@ if len(sys.argv) > 2:
 else:
     IMAGE_FILE = ""
 
+print("NOTE: if plasma crash do not worry")
 
 #params
 SDCARD_SIZE = 4000
@@ -118,18 +139,20 @@ if not os.path.exists(DEVICE):
 if something_is_missing:
     sys.exit()
 
-print("= Erase partition table on "+DEVICE)
-shout("dd if=/dev/zero of="+DEVICE+" bs=512 count=2048")
+print("= Erase partition table on "+DEVICE+" and everything else")
+shout("dd if=/dev/zero of="+DEVICE+" bs=1M count="+str(BOOT_SIZE+2))
 
 print("= Create partition table")
 shout("parted -s "+DEVICE+" mktable "+PT_TYPE)
 
-print("= Create FAT32 parttion")
+print("= Create FAT parttion")
 shout("parted -s "+DEVICE+" mkpart primary "+BOOT_FS+" 1 "+str(BOOT_SIZE))
 shout("parted -s "+DEVICE+" mkpart primary "+ROOT_FS+" "+str(BOOT_SIZE+1)+" 100%")
 # no need?
-shout("parted -s "+DEVICE+" align-check optimal 1")
-shout("parted -s "+DEVICE+" align-check optimal 2")
+#shout("parted -s "+DEVICE+" align-check optimal 1")
+#shout("parted -s "+DEVICE+" align-check optimal 2")
+
+#sys.exit()
 
 devs_created = False
 while not devs_created:
