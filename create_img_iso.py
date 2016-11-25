@@ -41,7 +41,7 @@ import time
 IMG_NAME = "sdimage.img"
 ISO_NAME = "sdimage.iso"
 
-SDCARD_SIZE = 4000
+SDCARD_SIZE = 3000
 
 PT_TYPE = "msdos"
 
@@ -73,6 +73,9 @@ def create_empty_img(name,sizeM):
     shout("dd if=/dev/zero of="+name+" bs=1M count="+str(sizeM))
 
 print("== Create image file: "+IMG_NAME)
+if os.path.isfile(IMG_NAME):
+  shout("rm -rf "+IMG_NAME)
+  
 create_empty_img(IMG_NAME,SDCARD_SIZE)
 
 shout("parted "+IMG_NAME+" mktable "+PT_TYPE)
@@ -103,8 +106,10 @@ while not devs_created:
 shout("mkfs.vfat /dev/mapper/loop0p1 -F 32 -n "+BOOT_LABEL)
 shout("mkfs.ext4 /dev/mapper/loop0p2 -L "+ROOT_LABEL)
 
-
-shout("mkdir tmp")
+if not os.path.isdir("tmp"):
+  shout("mkdir tmp")
+else:
+  shout("umount tmp")
 
 print("== copy boot to /dev/mapper/loop0p1")
 shout("mount /dev/mapper/loop0p1 tmp")
@@ -118,19 +123,22 @@ shout("mount /dev/mapper/loop0p2 tmp")
 shout("tar -C tmp/ -xzpf "+ROOT_ARCHIVE)
 shout("umount tmp")
 
+#sys.exit()
+
 shout("rm -rf tmp")
+
+#print("== convert img to iso")
+#http://www.linuxquestions.org/questions/linux-software-2/how-to-convert-img-to-iso-files-325650/
+#shout("mkisofs -f -r -udf -o "+ISO_NAME+" "+IMG_NAME)
+#shout("dd if=/dev/loop0 of="+ISO_NAME)
 
 print("== kpartx removes devices")
 shout("kpartx -dv "+IMG_NAME)
 
-print("== convert img to iso")
-#http://www.linuxquestions.org/questions/linux-software-2/how-to-convert-img-to-iso-files-325650/
-shout("mkisofs -f -r -udf -o "+ISO_NAME+" "+IMG_NAME)
-
 print("== compress img")
 shout("tar -czvf "+IMG_NAME+".tar.gz "+IMG_NAME)
 
-print("== compress iso")
-shout("tar -czvf "+ISO_NAME+".tar.gz "+ISO_NAME)
+#print("== compress iso")
+#shout("tar -czvf "+ISO_NAME+".tar.gz "+ISO_NAME)
 
 print("Done")
