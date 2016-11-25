@@ -140,7 +140,11 @@ if something_is_missing:
     sys.exit()
 
 print("= Erase partition table on "+DEVICE+" and everything else")
-shout("dd if=/dev/zero of="+DEVICE+" bs=1M count="+str(BOOT_SIZE+2))
+#shout("dd if=/dev/zero of="+DEVICE+" bs=1M count="+str(BOOT_SIZE+2))
+shout("dd if=/dev/zero of="+DEVICE+" bs=512 count=2")
+
+shout("dd if=/dev/zero of="+DEVICE+" bs=1MB count=1 seek=1")
+shout("dd if=/dev/zero of="+DEVICE+" bs=1MB count=1 seek="+str(BOOT_SIZE))
 
 print("= Create partition table")
 shout("parted -s "+DEVICE+" mktable "+PT_TYPE)
@@ -149,8 +153,8 @@ print("= Create FAT parttion")
 shout("parted -s "+DEVICE+" mkpart primary "+BOOT_FS+" 1 "+str(BOOT_SIZE))
 shout("parted -s "+DEVICE+" mkpart primary "+ROOT_FS+" "+str(BOOT_SIZE+1)+" 100%")
 # no need?
-#shout("parted -s "+DEVICE+" align-check optimal 1")
-#shout("parted -s "+DEVICE+" align-check optimal 2")
+shout("parted -s "+DEVICE+" align-check optimal 1")
+shout("parted -s "+DEVICE+" align-check optimal 2")
 
 #sys.exit()
 
