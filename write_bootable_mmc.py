@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-# Copyright (C) 2016, Elphel.inc.
+# Copyright (C) 2020, Elphel.inc.
 # Usage: known
 #
 # This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 '''
 
 __author__ = "Elphel"
-__copyright__ = "Copyright 2016, Elphel, Inc."
+__copyright__ = "Copyright 2020, Elphel, Inc."
 __license__ = "GPL"
 __version__ = "3.0+"
 __maintainer__ = "Oleg K Dzhimiev"
@@ -149,7 +149,7 @@ shout("dd if=/dev/zero of="+DEVICE+" bs=1MB count=1 seek="+str(BOOT_SIZE))
 print("= Create partition table")
 shout("parted -s "+DEVICE+" mktable "+PT_TYPE)
 
-print("= Create FAT parttion")
+print("= Create FAT partition")
 shout("parted -s "+DEVICE+" mkpart primary "+BOOT_FS+" 1 "+str(BOOT_SIZE))
 shout("parted -s "+DEVICE+" mkpart primary "+ROOT_FS+" "+str(BOOT_SIZE+1)+" 100%")
 # no need?
